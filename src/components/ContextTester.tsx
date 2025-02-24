@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, forwardRef, useImperativeHandle } from "react";
-import { useSession } from "next-auth/react";
+import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Editor from "@monaco-editor/react";
 import { Highlight, themes } from "prism-react-renderer";
 
@@ -149,7 +149,19 @@ const ContextTester = forwardRef<ContextTesterRef, ContextTesterProps>(({ projec
   });
   const [error, setError] = useState<string>();
 
+  const handleSignOut = () => {
+    signOut({
+      callbackUrl: '/',
+      redirect: true
+    });
+  };
+
   const evaluateContext = async () => {
+    if (!session) {
+      handleSignOut();
+      return;
+    }
+
     try {
       const parsedContext = JSON.parse(context);
       const response = await fetch("/api/evaluate", {
@@ -164,6 +176,12 @@ const ContextTester = forwardRef<ContextTesterRef, ContextTesterProps>(({ projec
         }),
       });
 
+      if (response.status === 401) {
+        // If we get an unauthorized response, sign out
+        handleSignOut();
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to evaluate flags");
       }
@@ -176,12 +194,18 @@ const ContextTester = forwardRef<ContextTesterRef, ContextTesterProps>(({ projec
     }
   };
 
+  // Call evaluateContext when the component mounts to check auth status
+  useEffect(() => {
+    evaluateContext();
+  }, []);
+
   useImperativeHandle(ref, () => ({
     evaluate: evaluateContext
   }));
 
   return (
     <div className="flex flex-col flex-1">
+    
       <div className="flex gap-4">
         <div className="w-1/2">
           <div className="h-[calc(100vh-200px)] border border-gray-300 rounded-md overflow-hidden">

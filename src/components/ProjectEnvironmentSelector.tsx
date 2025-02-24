@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import * as Select from "@radix-ui/react-select";
 
 interface Project {
@@ -30,6 +30,12 @@ const ProjectEnvironmentSelector = ({
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [environments, setEnvironments] = useState<Environment[]>([]);
+  const handleSignOut = () => {
+    signOut({
+      callbackUrl: '/',
+      redirect: true
+    });
+  };
 
   useEffect(() => {
     if (session?.accessToken) {
@@ -119,13 +125,22 @@ const ProjectEnvironmentSelector = ({
         </Select.Portal>
       </Select.Root>
 
-      <div className="flex-1" />
+      
       <button
         onClick={onEvaluate}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 h-9"
       >
         Evaluate
       </button>
+      
+      <div className="flex-1" />
+        <button
+          onClick={handleSignOut}
+          className="px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+        >
+          Sign Out
+        </button>
+    
     </div>
   );
 };
