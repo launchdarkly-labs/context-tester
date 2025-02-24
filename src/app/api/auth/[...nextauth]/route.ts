@@ -2,6 +2,10 @@ import NextAuth from "next-auth";
 import type { AuthOptions } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 
+if (!process.env.LAUNCHDARKLY_REDIRECT_URI) {
+  throw new Error("LAUNCHDARKLY_REDIRECT_URI environment variable is not set");
+}
+
 export interface LaunchDarklyProfile {
   _id: string;
   firstName: string;
@@ -31,13 +35,13 @@ export const authOptions: AuthOptions = {
         params: { 
           scope: "writer",
           response_type: "code",
-          redirect_uri: "https://redirect.tarq.workers.dev/http://localhost:3000/api/auth/callback/launchdarkly"
+          redirect_uri: process.env.LAUNCHDARKLY_REDIRECT_URI
         },
       },
       token: {
         url: "https://app.launchdarkly.com/trust/oauth/token",
         async request(context) {
-          const redirectUri = "https://redirect.tarq.workers.dev/http://localhost:3000/api/auth/callback/launchdarkly";
+          const redirectUri = process.env.LAUNCHDARKLY_REDIRECT_URI;
           
           console.log("Token exchange request:", {
             clientId: context.provider.clientId,

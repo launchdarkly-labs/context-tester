@@ -149,12 +149,6 @@ const ContextTester = forwardRef<ContextTesterRef, ContextTesterProps>(({ projec
   });
   const [error, setError] = useState<string>();
 
-  const handleSignOut = () => {
-    signOut({
-      callbackUrl: '/',
-      redirect: true
-    });
-  };
 
   const evaluateContext = async () => {
     if (!session) {

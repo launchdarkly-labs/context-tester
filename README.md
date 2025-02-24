@@ -21,55 +21,44 @@ A Next.js application that allows you to test LaunchDarkly feature flag evaluati
 
 ## Setup
 
-1. Set up HTTPS for local development:
-   ```bash
-   # Install mkcert
-   brew install mkcert # macOS
-   # For other operating systems, see https://github.com/FiloSottile/mkcert#installation
-   
-   # Install local CA
-   mkcert -install
-   
-   # Generate certificates (run this in the project root)
-   mkcert localhost
-   ```
-
-2. Clone the repository:
+1. Clone the repository:
    ```bash
    git clone <your-repo-url>
    cd ld-context-test
    ```
 
-3. Install dependencies:
+2. Install dependencies:
    ```bash
    npm install
    # or
    yarn install
    ```
 
-4. Create a `.env.local` file in the root directory with the following variables:
+3. Create a `.env.local` file in the root directory with the following variables:
    ```
    NEXTAUTH_URL=https://localhost:3000
    NEXTAUTH_SECRET=<your-random-secret>
    
    LAUNCHDARKLY_CLIENT_ID=<your-oauth-client-id>
    LAUNCHDARKLY_CLIENT_SECRET=<your-oauth-client-secret>
+   LAUNCHDARKLY_REDIRECT_URI=http://localhost:3000/api/auth/callback/launchdarkly
    ```
+
+   Note: The `LAUNCHDARKLY_REDIRECT_URI` should match the redirect URI you configured in your LaunchDarkly OAuth application settings.
 
 ## Setting up LaunchDarkly OAuth
 
-1. Log in to your LaunchDarkly account
-2. Go to Account Settings > Authorization
-3. Click "Create OAuth Application"
-4. Fill in the following details:
-   - Name: LD Context Tester (or your preferred name)
-   - Description: Tool for testing context evaluation
-   - Redirect URI: `https://example.com/api/auth/callback/launchdarkly`
-   - Application Type: Web Application
-5. After creation, you'll receive:
-   - Client ID
-   - Client Secret
-6. Copy these values to your `.env.local` file
+1. Create an OAuth application using the LaunchDarkly API:
+   ```bash
+   curl -X POST https://app.launchdarkly.com/api/v2/oauth/clients \
+     -H "Authorization: Bearer $LAUNCHDARKLY_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "name": "Context Tester",
+       "redirectUri": "http://localhost:3000/api/auth/callback/launchdarkly", 
+       "description": "OAuth client for testing LaunchDarkly contexts"
+     }' | tee launchdarkly-oauth-client.json
+   ```
 
 Note: You can't use http for the redirect URI, so you'll need to setup https locally or use ngrok to get a public URL.
 
