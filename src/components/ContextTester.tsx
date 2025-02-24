@@ -152,7 +152,7 @@ const ContextTester = forwardRef<ContextTesterRef, ContextTesterProps>(({ projec
 
   const evaluateContext = async () => {
     if (!session) {
-      handleSignOut();
+      signOut(); // Using signOut() from next-auth directly instead of undefined handleSignOut
       return;
     }
 
